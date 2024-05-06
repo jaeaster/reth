@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-reth
+spec:
+  type: ClusterIP
+  ports:
+  - name: metrics
+    port: {{ .Values.reth.ports.metrics }}
+    targetPort: {{ .Values.reth.ports.metrics }}
+  - name: peering
+    port: {{ .Values.reth.ports.peering }}
+    targetPort: {{ .Values.reth.ports.peering }}
+  - name: rpc
+    port: {{ .Values.reth.ports.rpc }}
+    targetPort: {{ .Values.reth.ports.rpc }}
+  - name: engine
+    port: {{ .Values.reth.ports.engine }}
+    targetPort: {{ .Values.reth.ports.engine }}
+

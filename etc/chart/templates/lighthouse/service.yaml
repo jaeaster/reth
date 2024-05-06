@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-lighthouse
+spec:
+  type: ClusterIP
+  ports:
+  - name: rpc
+    port: {{ .Values.lighthouse.ports.rpc }}
+    targetPort: {{ .Values.lighthouse.ports.rpc }}
+  - name: additional-tcp
+    port: {{ .Values.lighthouse.ports.additionalTcp }}
+    targetPort: {{ .Values.lighthouse.ports.additionalTcp }}
+  - name: metrics
+    port: {{ .Values.lighthouse.ports.metrics }}
+    targetPort: {{ .Values.lighthouse.ports.metrics }}
+  - name: p2p-tcp
+    port: {{ .Values.lighthouse.ports.p2pTcp }}
+    targetPort: {{ .Values.lighthouse.ports.p2pTcp }}
+  selector:
+    app: lighthouse
+

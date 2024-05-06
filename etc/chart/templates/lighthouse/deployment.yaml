@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-lighthouse
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: lighthouse
+  template:
+    metadata:
+      labels:
+        app: lighthouse
+    spec:
+      containers:
+      - name: lighthouse
+        image: "{{ .Values.lighthouse.image }}"
+        ports:
+        - containerPort: {{ .Values.lighthouse.ports.rpc }}
+        - containerPort: {{ .Values.lighthouse.ports.additionalTcp }}
+        - containerPort: {{ .Values.lighthouse.ports.metrics }}
+        - containerPort: {{ .Values.lighthouse.ports.p2pTcp }}
+        command:
+          - lighthouse
+          - bn
+          - "--network"
+          - "{{ .Values.lighthouse.network }}"
+          - "--http"
+          - "--http-address"
+          - "0.0.0.0"
+          - "--execution-endpoint"
+          - "{{ .Values.lighthouse.executionEndpoint }}"
+          - "--metrics"
+          - "--metrics-address"
+          - "0.0.0.0"
+          - "--execution-jwt"
+          - "/root/jwt/jwt.hex"
+          - "--checkpoint-sync-url"
+          - "{{ .Values.lighthouse.checkpointSyncUrl }}"
+        volumeMounts:
+        - name: lighthousedata
+          mountPath: /root/.lighthouse
+        - name: jwtsecret
+          mountPath: /root/jwt
+          readOnly: true
+      volumes:
+      - name: lighthousedata
+        persistentVolumeClaim:
+          claimName: lighthouse-data-pvc
+      - name: jwtsecret
+        secret:
+          secretName: jwt-secret

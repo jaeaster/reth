@@ -1,0 +1,34 @@
+shared:
+  hostStoragePath: "/Users/me/code/paradigmxyz/reth/etc/data/reth"
+
+lighthouse:
+  image: sigp/lighthouse:v5.1.3-modern
+  ports:
+    rpc: 5052
+    additionalTcp: 5053
+    metrics: 5054
+    p2pTcp: 9000
+    p2pUdp: 9000
+  volumes:
+    data: lighthousedata
+    jwt: jwtsecret
+  network: mainnet
+  executionEndpoint: "http://reth.default.svc.cluster.local:8551"
+  jwtPath: /root/jwt/jwt.hex
+  checkpointSyncUrl: https://mainnet.checkpoint.sigp.io
+
+reth:
+  image: ghcr.io/paradigmxyz/reth:latest
+  ports:
+    metrics: 9001
+    peering: 30303
+    rpc: 8545
+    engine: 8551
+  volumes:
+    mainnetData: mainnet-data
+    sepoliaData: sepolia-data
+    holeskyData: holesky-data
+    logs: log-storage
+    jwt: jwtsecret
+  chain: mainnet
+  jwtPath: /root/jwt/jwt.hex

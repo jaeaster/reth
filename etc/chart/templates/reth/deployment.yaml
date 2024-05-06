@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-reth
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: reth
+  template:
+    metadata:
+      labels:
+        app: reth
+    spec:
+      hostPID: true
+      containers:
+      - name: reth
+        image: "{{ .Values.reth.image }}"
+        ports:
+        - containerPort: {{ .Values.reth.ports.metrics }}
+        - containerPort: {{ .Values.reth.ports.peering }}
+        - containerPort: {{ .Values.reth.ports.rpc }}
+        - containerPort: {{ .Values.reth.ports.engine }}
+        command:
+          - "reth"
+          - "node"
+          - "--chain"
+          - "{{ .Values.reth.chain }}"
+          - "--metrics"
+          - "0.0.0.0:{{ .Values.reth.ports.metrics }}"
+          {{/* - "--log.file.directory" */}}
+          {{/* - "/root/logs" */}}
+          - "--authrpc.addr"
+          - "0.0.0.0"
+          - "--authrpc.port"
+          - "{{ .Values.reth.ports.engine }}"
+          - "--authrpc.jwtsecret"
+          - "/root/jwt/jwt.hex"  # Adjusted to match JWT path
+          - "--http"
+          - "--http.addr"
+          - "0.0.0.0"
+          - "--http.port"
+          - "{{ .Values.reth.ports.rpc }}"
+          - "--http.api"
+          - "eth,net,web3"
+        volumeMounts:
+        - name: mainnet-data
+          mountPath: /root/.local/share/reth/mainnet
+        {{/* - name: sepolia-data */}}
+        {{/*   mountPath: /root/.local/share/reth/sepolia */}}
+        {{/* - name: holesky-data */}}
+        {{/*   mountPath: /root/.local/share/reth/holesky */}}
+        {{/* - name: logs */}}
+        {{/*   mountPath: /root/logs */}}
+        - name: jwtsecret
+          mountPath: /root/jwt
+          readOnly: true
+      volumes:
+      - name: mainnet-data
+        persistentVolumeClaim:
+          claimName: mainnet-data-pvc
+      {{/* - name: sepolia-data */}}
+      {{/*   persistentVolumeClaim: */}}
+      {{/*     claimName: sepolia-data-pvc */}}
+      {{/* - name: holesky-data */}}
+      {{/*   persistentVolumeClaim: */}}
+      {{/*     claimName: holesky-data-pvc */}}
+      {{/* - name: logs */}}
+      {{/*   persistentVolumeClaim: */}}
+      {{/*     claimName: logs-pvc */}}
+      - name: jwtsecret
+        secret:
+          secretName: jwt-secret
